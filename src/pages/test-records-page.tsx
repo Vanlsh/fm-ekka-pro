@@ -3,7 +3,7 @@ import { useFiscalStore } from "@/store/fiscal";
 import { toast } from "@/components/ui/sonner";
 
 export const TestRecordsPage = () => {
-  const { data, clearTestRecords, setMessage } = useFiscalStore();
+  const { data, setMessage } = useFiscalStore();
 
   if (!data) {
     return (
@@ -14,7 +14,6 @@ export const TestRecordsPage = () => {
   }
 
   const handleClear = () => {
-    clearTestRecords();
     setMessage("Тестові записи очищено.");
     toast.success("Тестові записи очищено");
   };
@@ -24,7 +23,11 @@ export const TestRecordsPage = () => {
       <p className="text-sm text-muted-foreground">
         Усі тестові записи можна очистити кнопкою нижче.
       </p>
-      <Button variant="destructive" onClick={handleClear} className="w-full md:w-auto">
+      <Button
+        variant="destructive"
+        onClick={handleClear}
+        className="w-full md:w-auto"
+      >
         Очистити всі тестові записи
       </Button>
     </div>

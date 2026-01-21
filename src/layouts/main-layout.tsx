@@ -97,7 +97,7 @@ export function AppSidebar() {
     setMessage(null);
     try {
       const result = await window.api.openFiscalMemory();
-      console.log("🚀 ~ handleLoadFromSidebar ~ result:", result)
+      console.log("🚀 ~ handleLoadFromSidebar ~ result:", result);
       if (!result) {
         setMessage("Скасовано.");
         return;
@@ -198,11 +198,11 @@ export function AppSidebar() {
       <SidebarHeader className="px-3 py-4">
         <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-3">
           <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-sm font-semibold uppercase text-primary">
-            FM
+            EK
           </div>
           <div className="flex-1">
             <p className="text-sm font-semibold leading-tight text-foreground">
-              Fiscal Memory
+              EKKA Editor
             </p>
             <p className="text-xs text-muted-foreground">
               {fileName ? `Файл: ${fileName}` : "Файл ще не завантажено"}
@@ -334,11 +334,6 @@ export function AppSidebar() {
 export const MainLayout = () => {
   const { pathname } = useLocation();
   const sectionLabel = getSectionLabel(pathname);
-  const { data } = useFiscalStore();
-
-  const handleLogData = () => {
-    console.log("Fiscal data:", data);
-  };
 
   return (
     <SidebarProvider defaultValue="open">
@@ -350,15 +345,6 @@ export const MainLayout = () => {
             <span className="text-muted-foreground">Розділ:</span>
             <span className="text-foreground">{sectionLabel}</span>
           </div>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={handleLogData}
-            className="ml-auto"
-          >
-            Log data
-          </Button>
         </header>
         <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-4 p-4">
           <Outlet />

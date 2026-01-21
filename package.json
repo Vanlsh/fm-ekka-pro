@@ -1,7 +1,7 @@
 {
   "name": "fm-rro-pro",
   "version": "0.0.1",
-  "description": "FM RRO Pro desktop app for working with fiscal memory",
+  "description": "EKKA Editor desktop app for working with fiscal memory",
   "author": "Exellio <exellio@support.com>",
   "private": true,
   "type": "module",
@@ -91,8 +91,8 @@
     "wait-on": "^9.0.1"
   },
   "build": {
-    "appId": "com.exellio.fmrropro",
-    "productName": "FM RRO Pro",
+    "appId": "com.exellio.ekkaeditor",
+    "productName": "EKKA Editor",
     "directories": {
       "buildResources": "assets",
       "output": "release"
@@ -101,7 +101,7 @@
       {
         "provider": "github",
         "owner": "Vanlsh",
-        "repo": "fm-kasa-pro",
+        "repo": "fm-ekka-pro",
         "releaseType": "release"
       }
     ],

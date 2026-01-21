@@ -6,16 +6,17 @@ import { toast } from "@/components/ui/sonner";
 import { useFiscalStore } from "@/store/fiscal";
 import type { ZReport } from "@/lib/fm-types";
 import { zReportFieldLabels } from "@/lib/z-report-labels";
+import { buildRawFromIso } from "@/lib/fm-datetime";
 
 const fieldLabels = zReportFieldLabels;
 
 const baseFields: Array<keyof ZReport> = [
   "DateTime",
+  "LastDocument",
+  "LastFiscal",
+  "LastStorno",
   "FiscalCount",
   "StornoCount",
-  "LastDocument",
-  "KSEFNum",
-  "salesMode",
 ];
 
 const salesFields: Array<keyof ZReport> = [
@@ -24,15 +25,25 @@ const salesFields: Array<keyof ZReport> = [
   "ObigVatC",
   "ObigVatD",
   "ObigVatE",
-  "ZbirVatM",
-  "ZbirVatH",
+  "ObigVatF",
+  "ObigVatG",
+  "ObigVatH",
   "SumaVatA",
   "SumaVatB",
   "SumaVatC",
   "SumaVatD",
   "SumaVatE",
-  "ZbirVatMTax",
-  "ZbirVatHTax",
+  "SumaVatF",
+  "SumaVatG",
+  "SumaVatH",
+  "ZbirVatA",
+  "ZbirVatB",
+  "ZbirVatC",
+  "ZbirVatD",
+  "ZbirVatE",
+  "ZbirVatF",
+  "ZbirVatG",
+  "ZbirVatH",
 ];
 
 const returnFields: Array<keyof ZReport> = [
@@ -41,15 +52,25 @@ const returnFields: Array<keyof ZReport> = [
   "ObigVatCStorno",
   "ObigVatDStorno",
   "ObigVatEStorno",
+  "ObigVatFStorno",
+  "ObigVatGStorno",
+  "ObigVatHStorno",
   "SumaVatAStorno",
   "SumaVatBStorno",
   "SumaVatCStorno",
   "SumaVatDStorno",
   "SumaVatEStorno",
-  "ZbirVatMStorno",
+  "SumaVatFStorno",
+  "SumaVatGStorno",
+  "SumaVatHStorno",
+  "ZbirVatAStorno",
+  "ZbirVatBStorno",
+  "ZbirVatCStorno",
+  "ZbirVatDStorno",
+  "ZbirVatEStorno",
+  "ZbirVatFStorno",
+  "ZbirVatGStorno",
   "ZbirVatHStorno",
-  "ZbirVatMTaxStorno",
-  "ZbirVatHTaxStorno",
 ];
 
 const editableFields: Array<keyof ZReport> = [
@@ -70,8 +91,6 @@ export const ZReportEditPage = () => {
     return data.zReports.findIndex((item) => item.ZNumber === zNumber);
   }, [data?.zReports, zNumber]);
   const report = reportIndex >= 0 ? data?.zReports[reportIndex] : undefined;
-  console.log("🚀 ~ ZReportEditPage ~ report:", report);
-
   useEffect(() => {
     if (!report) return;
     const draft = editableFields.reduce<Record<string, string>>((acc, key) => {
@@ -88,6 +107,7 @@ export const ZReportEditPage = () => {
   const handleSave = () => {
     if (!report || reportIndex < 0) return;
     const updated: ZReport = { ...report };
+    let hasInvalidDate = false;
     editableFields.forEach((key) => {
       const rawValue = editDraft[key] ?? "";
       if (key === "DateTime") {
@@ -95,10 +115,12 @@ export const ZReportEditPage = () => {
           updated.DateTime = null;
           return;
         }
-        const existing = report.DateTime;
-        updated.DateTime = existing
-          ? { ...existing, iso: rawValue }
-          : { raw: { time: 0, date: 0 }, iso: rawValue };
+        const raw = buildRawFromIso(rawValue);
+        if (!raw) {
+          hasInvalidDate = true;
+          return;
+        }
+        updated.DateTime = { raw, iso: rawValue };
         return;
       }
       const original = report[key];
@@ -111,6 +133,11 @@ export const ZReportEditPage = () => {
         (updated as any)[key] = rawValue as any;
       }
     });
+
+    if (hasInvalidDate) {
+      toast.error("Некоректна дата/час.");
+      return;
+    }
 
     setZReports((prev) =>
       prev.map((item, idx) => (idx === reportIndex ? updated : item))

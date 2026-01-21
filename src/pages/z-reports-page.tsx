@@ -35,7 +35,6 @@ export const ZReportsPage = () => {
   const [zRangeStart, setZRangeStart] = useState("");
   const [zRangeEnd, setZRangeEnd] = useState("");
   const [isImportDialogOpen, setImportDialogOpen] = useState(false);
-  const [ksefInput, setKsefInput] = useState("");
   const [openDetails, setOpenDetails] = useState<Record<number, boolean>>({});
 
   const reports = data?.zReports ?? [];
@@ -43,76 +42,90 @@ export const ZReportsPage = () => {
   const overscan = 10;
   const itemGap = 12;
 
+  const createEmptyZReport = (zNumber: number): ZReport => ({
+    ZNumber: zNumber,
+    DateTime: null,
+    FMNumChanges: 0,
+    TaxNumChanges: 0,
+    VatChanges: 0,
+    RamResetsCount: 0,
+    LastDocument: 0,
+    LastFiscal: 0,
+    LastStorno: 0,
+    FiscalCount: 0,
+    StornoCount: 0,
+    ObigVatA: "0",
+    ObigVatB: "0",
+    ObigVatC: "0",
+    ObigVatD: "0",
+    ObigVatE: "0",
+    ObigVatF: "0",
+    ObigVatG: "0",
+    ObigVatH: "0",
+    ObigVatAStorno: "0",
+    ObigVatBStorno: "0",
+    ObigVatCStorno: "0",
+    ObigVatDStorno: "0",
+    ObigVatEStorno: "0",
+    ObigVatFStorno: "0",
+    ObigVatGStorno: "0",
+    ObigVatHStorno: "0",
+    SumaVatA: "0",
+    SumaVatB: "0",
+    SumaVatC: "0",
+    SumaVatD: "0",
+    SumaVatE: "0",
+    SumaVatF: "0",
+    SumaVatG: "0",
+    SumaVatH: "0",
+    SumaVatAStorno: "0",
+    SumaVatBStorno: "0",
+    SumaVatCStorno: "0",
+    SumaVatDStorno: "0",
+    SumaVatEStorno: "0",
+    SumaVatFStorno: "0",
+    SumaVatGStorno: "0",
+    SumaVatHStorno: "0",
+    ZbirVatA: "0",
+    ZbirVatB: "0",
+    ZbirVatC: "0",
+    ZbirVatD: "0",
+    ZbirVatE: "0",
+    ZbirVatF: "0",
+    ZbirVatG: "0",
+    ZbirVatH: "0",
+    ZbirVatAStorno: "0",
+    ZbirVatBStorno: "0",
+    ZbirVatCStorno: "0",
+    ZbirVatDStorno: "0",
+    ZbirVatEStorno: "0",
+    ZbirVatFStorno: "0",
+    ZbirVatGStorno: "0",
+    ZbirVatHStorno: "0",
+  });
+
   const handleAddReport = () => {
     if (!data) return;
     const nextNumber = reports.length + 1;
     pendingScrollIndexRef.current = reports.length;
     setZReports((prev) => [
       ...prev,
-      {
-        ZNumber: nextNumber,
-        DateTime: null,
-        LastDocument: 0,
-        FiscalCount: 0,
-        StornoCount: 0,
-        KSEFNum: 0,
-        ObigVatA: "",
-        ObigVatB: "",
-        ObigVatC: "",
-        ObigVatD: "",
-        ObigVatE: "",
-        ObigVatAStorno: "",
-        ObigVatBStorno: "",
-        ObigVatCStorno: "",
-        ObigVatDStorno: "",
-        ObigVatEStorno: "",
-        SumaVatA: "",
-        SumaVatB: "",
-        SumaVatC: "",
-        SumaVatD: "",
-        SumaVatE: "",
-        SumaVatAStorno: "",
-        SumaVatBStorno: "",
-        SumaVatCStorno: "",
-        SumaVatDStorno: "",
-        SumaVatEStorno: "",
-        ZbirVatM: "",
-        ZbirVatH: "",
-        ZbirVatMStorno: "",
-        ZbirVatHStorno: "",
-        ZbirVatMTax: "",
-        ZbirVatHTax: "",
-        ZbirVatMTaxStorno: "",
-        ZbirVatHTaxStorno: "",
-        salesMode: 0,
-      },
+      createEmptyZReport(nextNumber),
     ]);
   };
 
   const normalizeReports = (items: ZReport[]) =>
-    items.map((item, idx) => ({
-      ...item,
-      ZNumber: idx + 1,
-    }));
-
-  const applyKsefNumber = (items: ZReport[], ksefNumber: number) =>
-    items.map((item) => ({ ...item, KSEFNum: ksefNumber }));
+    items.map((item, idx) => {
+      const nextNumber = idx + 1;
+      return { ...createEmptyZReport(nextNumber), ...item, ZNumber: nextNumber };
+    });
 
   const handleImportReports = async (mode: "add" | "overwrite") => {
     if (!data) return;
     setImportDialogOpen(false);
     const result = await window.api.importZReports();
     if (!result) return;
-    const ksefNumber =
-      mode === "overwrite" ? 1 : Number(ksefInput.trim() || NaN);
-    if (mode === "add" && Number.isNaN(ksefNumber)) {
-      toast.error("Вкажіть номер KSEF для додавання.");
-      return;
-    }
-    const nextReports = applyKsefNumber(
-      normalizeReports(result.reports),
-      ksefNumber
-    );
+    const nextReports = normalizeReports(result.reports);
     if (mode === "overwrite") {
       setZReports(() => nextReports);
       toast.success("Z-звіти імпортовано (перезаписано).");
@@ -208,7 +221,6 @@ export const ZReportsPage = () => {
         .map((item, idx) => ({
           ...item,
           ZNumber: idx + 1,
-          FiscalCount: idx + 1,
         }))
     );
   };
@@ -224,7 +236,6 @@ export const ZReportsPage = () => {
         .map((item, idx) => ({
           ...item,
           ZNumber: idx + 1,
-          // FiscalCount: idx + 1,
         }))
     );
   };
@@ -297,63 +308,81 @@ export const ZReportsPage = () => {
 
             <CollapsibleContent className="mt-3 space-y-2 overflow-hidden text-[12px] transition-[height] duration-200 ease-out data-[state=closed]:h-0 data-[state=open]:h-[var(--radix-collapsible-content-height)]">
               <div className="mt-2 grid grid-cols-2 gap-2 text-[12px]">
+                {renderField(fieldLabels.FMNumChanges, report.FMNumChanges)}
+                {renderField(fieldLabels.TaxNumChanges, report.TaxNumChanges)}
+                {renderField(fieldLabels.VatChanges, report.VatChanges)}
+                {renderField(fieldLabels.RamResetsCount, report.RamResetsCount)}
                 {renderField(fieldLabels.FiscalCount, report.FiscalCount)}
                 {renderField(fieldLabels.StornoCount, report.StornoCount)}
                 {renderField(fieldLabels.LastDocument, report.LastDocument)}
-                {renderField(fieldLabels.KSEFNum, report.KSEFNum)}
-                {renderField(fieldLabels.salesMode, report.salesMode)}
+                {renderField(fieldLabels.LastFiscal, report.LastFiscal)}
+                {renderField(fieldLabels.LastStorno, report.LastStorno)}
                 {renderField(fieldLabels.DateTime, report.DateTime?.iso ?? "—")}
               </div>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {renderField(fieldLabels.ObigVatA, report.ObigVatA)}
                 {renderField(fieldLabels.ObigVatB, report.ObigVatB)}
                 {renderField(fieldLabels.ObigVatC, report.ObigVatC)}
                 {renderField(fieldLabels.ObigVatD, report.ObigVatD)}
                 {renderField(fieldLabels.ObigVatE, report.ObigVatE)}
+                {renderField(fieldLabels.ObigVatF, report.ObigVatF)}
+                {renderField(fieldLabels.ObigVatG, report.ObigVatG)}
+                {renderField(fieldLabels.ObigVatH, report.ObigVatH)}
               </div>
 
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {renderField(fieldLabels.ObigVatAStorno, report.ObigVatAStorno)}
                 {renderField(fieldLabels.ObigVatBStorno, report.ObigVatBStorno)}
                 {renderField(fieldLabels.ObigVatCStorno, report.ObigVatCStorno)}
                 {renderField(fieldLabels.ObigVatDStorno, report.ObigVatDStorno)}
                 {renderField(fieldLabels.ObigVatEStorno, report.ObigVatEStorno)}
+                {renderField(fieldLabels.ObigVatFStorno, report.ObigVatFStorno)}
+                {renderField(fieldLabels.ObigVatGStorno, report.ObigVatGStorno)}
+                {renderField(fieldLabels.ObigVatHStorno, report.ObigVatHStorno)}
               </div>
 
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {renderField(fieldLabels.SumaVatA, report.SumaVatA)}
                 {renderField(fieldLabels.SumaVatB, report.SumaVatB)}
                 {renderField(fieldLabels.SumaVatC, report.SumaVatC)}
                 {renderField(fieldLabels.SumaVatD, report.SumaVatD)}
                 {renderField(fieldLabels.SumaVatE, report.SumaVatE)}
+                {renderField(fieldLabels.SumaVatF, report.SumaVatF)}
+                {renderField(fieldLabels.SumaVatG, report.SumaVatG)}
+                {renderField(fieldLabels.SumaVatH, report.SumaVatH)}
               </div>
 
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {renderField(fieldLabels.SumaVatAStorno, report.SumaVatAStorno)}
                 {renderField(fieldLabels.SumaVatBStorno, report.SumaVatBStorno)}
                 {renderField(fieldLabels.SumaVatCStorno, report.SumaVatCStorno)}
                 {renderField(fieldLabels.SumaVatDStorno, report.SumaVatDStorno)}
                 {renderField(fieldLabels.SumaVatEStorno, report.SumaVatEStorno)}
+                {renderField(fieldLabels.SumaVatFStorno, report.SumaVatFStorno)}
+                {renderField(fieldLabels.SumaVatGStorno, report.SumaVatGStorno)}
+                {renderField(fieldLabels.SumaVatHStorno, report.SumaVatHStorno)}
               </div>
 
               <div className="grid grid-cols-4 gap-2">
-                {renderField(fieldLabels.ZbirVatM, report.ZbirVatM)}
+                {renderField(fieldLabels.ZbirVatA, report.ZbirVatA)}
+                {renderField(fieldLabels.ZbirVatB, report.ZbirVatB)}
+                {renderField(fieldLabels.ZbirVatC, report.ZbirVatC)}
+                {renderField(fieldLabels.ZbirVatD, report.ZbirVatD)}
+                {renderField(fieldLabels.ZbirVatE, report.ZbirVatE)}
+                {renderField(fieldLabels.ZbirVatF, report.ZbirVatF)}
+                {renderField(fieldLabels.ZbirVatG, report.ZbirVatG)}
                 {renderField(fieldLabels.ZbirVatH, report.ZbirVatH)}
-                {renderField(fieldLabels.ZbirVatMStorno, report.ZbirVatMStorno)}
-                {renderField(fieldLabels.ZbirVatHStorno, report.ZbirVatHStorno)}
               </div>
 
               <div className="grid grid-cols-4 gap-2">
-                {renderField(fieldLabels.ZbirVatMTax, report.ZbirVatMTax)}
-                {renderField(fieldLabels.ZbirVatHTax, report.ZbirVatHTax)}
-                {renderField(
-                  fieldLabels.ZbirVatMTaxStorno,
-                  report.ZbirVatMTaxStorno
-                )}
-                {renderField(
-                  fieldLabels.ZbirVatHTaxStorno,
-                  report.ZbirVatHTaxStorno
-                )}
+                {renderField(fieldLabels.ZbirVatAStorno, report.ZbirVatAStorno)}
+                {renderField(fieldLabels.ZbirVatBStorno, report.ZbirVatBStorno)}
+                {renderField(fieldLabels.ZbirVatCStorno, report.ZbirVatCStorno)}
+                {renderField(fieldLabels.ZbirVatDStorno, report.ZbirVatDStorno)}
+                {renderField(fieldLabels.ZbirVatEStorno, report.ZbirVatEStorno)}
+                {renderField(fieldLabels.ZbirVatFStorno, report.ZbirVatFStorno)}
+                {renderField(fieldLabels.ZbirVatGStorno, report.ZbirVatGStorno)}
+                {renderField(fieldLabels.ZbirVatHStorno, report.ZbirVatHStorno)}
               </div>
             </CollapsibleContent>
           </Collapsible>
@@ -375,11 +404,10 @@ export const ZReportsPage = () => {
               size="sm"
               variant="outline"
               onClick={() => {
-                setKsefInput("");
                 setImportDialogOpen(true);
               }}
             >
-              Імпорт з КСЕФ
+              Імпорт
             </Button>
             <Button size="sm" onClick={handleAddReport}>
               Додати
@@ -453,29 +481,11 @@ export const ZReportsPage = () => {
                   Додати імпортовані звіти до поточних чи перезаписати?
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <div className="space-y-2">
-                <label className="space-y-1">
-                  <span className="block text-xs font-medium text-muted-foreground">
-                    Номер KSEF для додавання
-                  </span>
-                  <Input
-                    type="number"
-                    inputMode="numeric"
-                    value={ksefInput}
-                    onChange={(e) => setKsefInput(e.target.value)}
-                    placeholder="Вкажіть номер KSEF"
-                  />
-                </label>
-                <p className="text-xs text-muted-foreground">
-                  Для перезапису KSEF автоматично встановлюється на 1.
-                </p>
-              </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Скасувати</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => handleImportReports("add")}
                   className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                  disabled={Number.isNaN(Number(ksefInput.trim()))}
                 >
                   Додати
                 </AlertDialogAction>

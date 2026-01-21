@@ -70,8 +70,12 @@ export function AppSidebar() {
 
   const getUpdatedSaveName = (currentPath: string | null) => {
     if (!currentPath) return "fiscal-memory_updated.bin";
-    const lastSlash = Math.max(currentPath.lastIndexOf("/"), currentPath.lastIndexOf("\\"));
-    const name = lastSlash >= 0 ? currentPath.slice(lastSlash + 1) : currentPath;
+    const lastSlash = Math.max(
+      currentPath.lastIndexOf("/"),
+      currentPath.lastIndexOf("\\"),
+    );
+    const name =
+      lastSlash >= 0 ? currentPath.slice(lastSlash + 1) : currentPath;
     const dot = name.lastIndexOf(".");
     if (dot > 0) {
       const base = name.slice(0, dot);
@@ -93,6 +97,8 @@ export function AppSidebar() {
     setMessage(null);
     try {
       const result = await window.api.openFiscalMemory();
+      console.log("🚀 ~ handleLoadFromSidebar ~ result:", result);
+      return;
       if (!result) {
         setMessage("Скасовано.");
         return;
@@ -121,7 +127,7 @@ export function AppSidebar() {
     try {
       const result = await window.api.saveFiscalMemoryAs(
         data,
-        getUpdatedSaveName(path)
+        getUpdatedSaveName(path),
       );
       if (!result) {
         setMessage("Збереження скасовано.");
@@ -329,6 +335,11 @@ export function AppSidebar() {
 export const MainLayout = () => {
   const { pathname } = useLocation();
   const sectionLabel = getSectionLabel(pathname);
+  const { data } = useFiscalStore();
+
+  const handleLogData = () => {
+    console.log("Fiscal data:", data);
+  };
 
   return (
     <SidebarProvider defaultValue="open">
@@ -340,6 +351,15 @@ export const MainLayout = () => {
             <span className="text-muted-foreground">Розділ:</span>
             <span className="text-foreground">{sectionLabel}</span>
           </div>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleLogData}
+            className="ml-auto"
+          >
+            Log data
+          </Button>
         </header>
         <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-4 p-4">
           <Outlet />

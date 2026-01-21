@@ -1,0 +1,263 @@
+//--------------------------------------
+//--- 010 Editor v3.2.2 Binary Template
+//
+// File: DP_25 FiscalMemory
+// Author: Havinskiy Victor
+// Revision: 10.09.2014
+// Purpose:
+//--------------------------------------
+
+
+typedef struct{
+        WORD Year;
+        ubyte Mounth;
+        ubyte Day;
+        ubyte Hour;
+        ubyte Minutes;
+        ubyte Seconds;
+        ubyte Mseconds;
+}DateTimeDP25 <read=DateTimeFormat>;
+typedef struct{
+        struct{
+            char FMNumber[10];
+            DateTimeDP25 DateTime;
+            byte Filler[5];
+        }Data;
+        ubyte CheckSum[1];
+    }FMNumberRecordType;
+typedef struct{
+        struct{
+            byte type[1];
+            char TAXNumber[12];
+            byte Filler[1];
+            DateTimeDP25 DateTime;
+            byte Filler2[9];
+        }Data;
+        ubyte CheckSum[1];
+    }TaxIDNumType;
+typedef struct{
+          struct{
+            WORD VatA;
+            WORD VatB;
+            WORD VatC;
+            WORD VatD;
+            WORD VatE;
+            WORD VatF;
+            WORD VatG;
+            WORD VatH;
+
+            WORD VatAzbir;
+            WORD VatBzbir;
+            WORD VatCzbir;
+            WORD VatDzbir;
+            WORD VatEzbir;
+            WORD VatFzbir;
+            WORD VatGzbir;
+            WORD VatHzbir;
+            DateTimeDP25 DateTime;
+            WORD NextZNumber;
+            byte VATExcluded;
+            byte DecPoint;
+            byte Filler[3];
+          }Data;  
+            ubyte CheckSum;
+    }VatRateChangesType;
+typedef struct{
+            struct{
+                DateTimeDP25 DateTime;
+                WORD NextZNumber;
+                byte Flag;
+                byte Filler[4];
+            }Data;
+            ubyte CheckSum;
+}RAMResetRecordType <read=RAMResetProc>;
+
+typedef struct{
+            struct{
+                WORD ZNumber;
+                DateTimeDP25 DateTime;
+                byte FMNumChanges;
+                byte TaxNumChanges;
+                byte VatChanges;
+                byte RamResetsCount;
+                byte Filler[2];
+                DWORD LastDocument;
+                DWORD LastFiscal;
+                DWORD LastStorno;
+                WORD FiscalCount;
+                WORD StornoCount;
+
+                QWORD ObigVatA;
+                QWORD ObigVatB;
+                QWORD ObigVatC;
+                QWORD ObigVatD;
+                QWORD ObigVatE;
+                QWORD ObigVatF;
+                QWORD ObigVatG;
+                QWORD ObigVatH;
+
+                QWORD ObigVatAStorno;
+                QWORD ObigVatBStorno;
+                QWORD ObigVatCStorno;
+                QWORD ObigVatDStorno;
+                QWORD ObigVatEStorno;
+                QWORD ObigVatFStorno;
+                QWORD ObigVatGStorno;
+                QWORD ObigVatHStorno;
+
+                QWORD SumaVatA;
+                QWORD SumaVatB;
+                QWORD SumaVatC;
+                QWORD SumaVatD;
+                QWORD SumaVatE;
+                QWORD SumaVatF;
+                QWORD SumaVatG;
+                QWORD SumaVatH;
+
+                QWORD SumaVatAStorno;
+                QWORD SumaVatBStorno;
+                QWORD SumaVatCStorno;
+                QWORD SumaVatDStorno;
+                QWORD SumaVatEStorno;
+                QWORD SumaVatFStorno;
+                QWORD SumaVatGStorno;
+                QWORD SumaVatHStorno;
+
+                QWORD ZbirVatA;
+                QWORD ZbirVatB;
+                QWORD ZbirVatC;
+                QWORD ZbirVatD;
+                QWORD ZbirVatE;
+                QWORD ZbirVatF;
+                QWORD ZbirVatG;
+                QWORD ZbirVatH;
+
+                QWORD ZbirVatAStorno;
+                QWORD ZbirVatBStorno;
+                QWORD ZbirVatCStorno;
+                QWORD ZbirVatDStorno;
+                QWORD ZbirVatEStorno;
+                QWORD ZbirVatFStorno;
+                QWORD ZbirVatGStorno;
+                QWORD ZbirVatHStorno;
+                byte Filler2[15];                
+            }Data;
+            ubyte CheckSum;
+}ZReportType <read=ZReportEmpty>;
+typedef struct{
+            struct{
+                DateTimeDP25 DateTime;
+                DWORD LastRecOnOpening;
+                WORD LastZOnOpening;
+                byte Filler[9];
+            }Data;
+            ubyte CheckSum;
+}EJ_OpenType <read=EJOpenProc>;
+typedef struct{
+            struct{
+                DateTimeDP25 DateTime;
+                DWORD LastRecOnClose;
+                WORD LastZOnClose;
+                ubyte Lost_Or_Broken;
+                byte Filler[8];
+            }Data;
+            ubyte CheckSum;
+}EJ_CloseType <read=EJCloseProc>;
+struct DP25_FiscalMemory {
+    struct{
+        char TestSpace_1 [24];
+        char TestSpace_2 [24];
+        char TestSpace_3 [24];
+        char TestSpace_4 [24];
+        char TestSpace_5 [24];
+        char TestSpace_6 [24];
+        char TestSpace_7 [24];
+        char TestSpace_8 [24];
+        char TestSpace_9 [24];
+        char TestSpace_10[24];
+        char TestSpace_11[24];
+        char TestSpace_12[24];
+        char TestSpace_13[24];
+        char TestSpace_14[24];
+        char TestSpace_15[24];
+        char TestSpace_16[24];
+
+    }TestSpace <bgcolor=cGray>;
+
+    struct{
+        struct{
+            char SerialNumber[10]<bgcolor=cLtYellow>;
+            DateTimeDP25 DateTime;
+            byte Filler[5];
+        }Data;
+        ubyte CheckSum[1];
+    }SerialRecord;
+    struct{
+        struct{
+            DateTimeDP25 DateTime;
+            byte Filler[7];
+        }Data;
+        ubyte CheckSum[1];
+    }FiscalModeStart;
+    FMNumberRecordType FMNumberRecord[8];
+    TaxIDNumType TaxIDNum[8];
+    VatRateChangesType VatRateChanges[32];
+    RAMResetRecordType RAMResetRecord[100];
+    ZReportType ZReport[4500];
+    EJ_OpenType EJ_Open[20];
+    EJ_CloseType EJ_Close[20];
+    byte NotUsed[148168]<bgcolor=cGray>;
+    ubyte CPU_ID[16]<bgcolor=cLtPurple>;
+}file;
+
+string ZReportEmpty( ZReportType &a )
+{
+    string s;
+    //MessageBox( idOk, "CheckSum", "You need file opened..." );
+    if (a.Data.ZNumber==0xFFFF){
+        s="EMPTY!!!";
+    } else {
+        SPrintf( s, "#%04u",a.Data.ZNumber);
+        //Printf("%04X\n",a.Data.ZNumber);
+    }
+    return s;
+};
+string DateTimeFormat( DateTimeDP25 &a )
+{
+    string s;
+    SPrintf( s, "%04u.%02u.%02u %02u:%02u:%02u:%02u",a.Year,a.Mounth,a.Day,a.Hour,a.Minutes,a.Seconds,a.Mseconds);
+    return s;
+}
+string RAMResetProc( RAMResetRecordType &a )
+{
+    string s;
+    if (a.Data.NextZNumber==0xFFFF){
+        s="EMPTY!!!";
+    }
+    else{
+        SPrintf( s, "%04u.%02u.%02u %02u:%02u:%02u:%02u",a.Data.DateTime.Year,a.Data.DateTime.Mounth,a.Data.DateTime.Day,a.Data.DateTime.Hour,a.Data.DateTime.Minutes,a.Data.DateTime.Seconds,a.Data.DateTime.Mseconds);
+    }
+    return s;
+}
+string EJOpenProc(EJ_OpenType &a)
+{
+    string s;
+    if (a.Data.LastZOnOpening==0xFFFF){
+        s="EMPTY!!!";
+    }
+    else{
+        SPrintf( s, "%04u.%02u.%02u %02u:%02u:%02u:%02u",a.Data.DateTime.Year,a.Data.DateTime.Mounth,a.Data.DateTime.Day,a.Data.DateTime.Hour,a.Data.DateTime.Minutes,a.Data.DateTime.Seconds,a.Data.DateTime.Mseconds);
+    }
+    return s;
+}
+string EJCloseProc(EJ_CloseType &a)
+{
+    string s;
+    if (a.Data.LastRecOnClose==0xFFFF){
+        s="EMPTY!!!";
+    }
+    else{
+        SPrintf( s, "%04u.%02u.%02u %02u:%02u:%02u:%02u",a.Data.DateTime.Year,a.Data.DateTime.Mounth,a.Data.DateTime.Day,a.Data.DateTime.Hour,a.Data.DateTime.Minutes,a.Data.DateTime.Seconds,a.Data.DateTime.Mseconds);
+    }
+    return s;
+}

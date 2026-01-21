@@ -1,20 +1,22 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import updaterPkg from "electron-updater";
 import path from "path";
+import { createRequire } from "module";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import iconv from "iconv-lite";
-import {
-  buildFiscalMemory,
-  loadFiscalMemoryFile,
-  parseFiscalMemory,
-  saveFiscalMemoryFile,
-} from "./lib/fm-parser.js";
 import { parseZReportsFromText } from "./lib/ej-zreport-parser.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { autoUpdater } = updaterPkg;
 let mainWindow;
+const require = createRequire(import.meta.url);
+const {
+  buildDP25FiscalMemory,
+  loadDP25File,
+  parseDP25FiscalMemory,
+  saveDP25File,
+} = require("./lib/dp-fm-parser.cjs");
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -116,12 +118,12 @@ app.whenReady().then(() => {
     });
     if (canceled || filePaths.length === 0) return null;
     const filePath = filePaths[0];
-    const data = await loadFiscalMemoryFile(filePath);
+    const data = await loadDP25File(filePath);
     return { filePath, data };
   });
 
   ipcMain.handle("fm-parse-buffer", async (_event, buffer) => {
-    return parseFiscalMemory(Buffer.from(buffer));
+    return parseDP25FiscalMemory(Buffer.from(buffer));
   });
 
   ipcMain.handle("fm-save-dialog", async (_event, data, defaultPath) => {
@@ -131,13 +133,13 @@ app.whenReady().then(() => {
       filters: [{ name: "Binary", extensions: ["bin"] }],
     });
     if (canceled || !filePath) return null;
-    await saveFiscalMemoryFile(filePath, data);
+    await saveDP25File(filePath, data);
     return { filePath, success: true };
   });
 
   ipcMain.handle("fm-save-to-path", async (_event, filePath, data) => {
     await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
-    await saveFiscalMemoryFile(filePath, data);
+    await saveDP25File(filePath, data);
     return { filePath, success: true };
   });
 

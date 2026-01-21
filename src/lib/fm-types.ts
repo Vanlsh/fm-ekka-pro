@@ -1,95 +1,150 @@
 export type FiscalDateTime = {
-  raw: { time: number; date: number };
+  raw: {
+    year: number;
+    month: number;
+    day: number;
+    hour: number;
+    minutes: number;
+    seconds: number;
+    mseconds: number;
+  };
   iso: string;
 };
 
 export type SerialRecord = {
-  dateTime: FiscalDateTime | null;
-  countryNumber: number;
   serialNumber: string;
+  dateTime: FiscalDateTime | null;
+};
+
+export type FiscalModeStart = {
+  dateTime: FiscalDateTime | null;
 };
 
 export type FMNumberRecord = {
-  dateTime: FiscalDateTime | null;
   fmNumber: string;
+  dateTime: FiscalDateTime | null;
 };
 
 export type VatRateChange = {
-  dateTime: FiscalDateTime | null;
   VatA: number;
   VatB: number;
   VatC: number;
   VatD: number;
-  VatM: number;
+  VatE: number;
+  VatF: number;
+  VatG: number;
   VatH: number;
-  DecPoint: number;
+  VatAzbir: number;
+  VatBzbir: number;
+  VatCzbir: number;
+  VatDzbir: number;
+  VatEzbir: number;
+  VatFzbir: number;
+  VatGzbir: number;
+  VatHzbir: number;
+  dateTime: FiscalDateTime | null;
+  NextZNumber: number;
   VATExcluded: number;
-  AssociatedMask: number;
+  DecPoint: number;
 };
 
 export type TaxIdRecord = {
-  dateTime: FiscalDateTime | null;
   type: number;
-  lastZReport: number;
   taxNumber: string;
+  dateTime: FiscalDateTime | null;
+};
+
+export type RamResetRecord = {
+  dateTime: FiscalDateTime | null;
+  NextZNumber: number;
+  Flag: number;
 };
 
 export type ZReport = {
   ZNumber: number;
   DateTime: FiscalDateTime | null;
+  FMNumChanges: number;
+  TaxNumChanges: number;
+  VatChanges: number;
+  RamResetsCount: number;
   LastDocument: number;
+  LastFiscal: number;
+  LastStorno: number;
   FiscalCount: number;
   StornoCount: number;
-  KSEFNum: number;
   ObigVatA: string;
   ObigVatB: string;
   ObigVatC: string;
   ObigVatD: string;
   ObigVatE: string;
+  ObigVatF: string;
+  ObigVatG: string;
+  ObigVatH: string;
   ObigVatAStorno: string;
   ObigVatBStorno: string;
   ObigVatCStorno: string;
   ObigVatDStorno: string;
   ObigVatEStorno: string;
+  ObigVatFStorno: string;
+  ObigVatGStorno: string;
+  ObigVatHStorno: string;
   SumaVatA: string;
   SumaVatB: string;
   SumaVatC: string;
   SumaVatD: string;
   SumaVatE: string;
+  SumaVatF: string;
+  SumaVatG: string;
+  SumaVatH: string;
   SumaVatAStorno: string;
   SumaVatBStorno: string;
   SumaVatCStorno: string;
   SumaVatDStorno: string;
   SumaVatEStorno: string;
-  ZbirVatM: string;
+  SumaVatFStorno: string;
+  SumaVatGStorno: string;
+  SumaVatHStorno: string;
+  ZbirVatA: string;
+  ZbirVatB: string;
+  ZbirVatC: string;
+  ZbirVatD: string;
+  ZbirVatE: string;
+  ZbirVatF: string;
+  ZbirVatG: string;
   ZbirVatH: string;
-  ZbirVatMStorno: string;
+  ZbirVatAStorno: string;
+  ZbirVatBStorno: string;
+  ZbirVatCStorno: string;
+  ZbirVatDStorno: string;
+  ZbirVatEStorno: string;
+  ZbirVatFStorno: string;
+  ZbirVatGStorno: string;
   ZbirVatHStorno: string;
-  ZbirVatMTax: string;
-  ZbirVatHTax: string;
-  ZbirVatMTaxStorno: string;
-  ZbirVatHTaxStorno: string;
-  salesMode: number;
-  // The following counters are derived during write; they may be absent when parsed.
-  FMNumChanges?: number;
-  LastFiscalizationNum?: number;
-  TaxNumChanges?: number;
-  RamResetsCount?: number;
+  CheckSum?: number;
 };
 
-export type FiscalMemoryMeta = {
-  flag: number;
-  idString: string;
-  ksefNumbers: number[];
+export type EJOpenRecord = {
+  dateTime: FiscalDateTime | null;
+  lastRecOnOpening: number;
+  lastZOnOpening: number;
+};
+
+export type EJCloseRecord = {
+  dateTime: FiscalDateTime | null;
+  lastRecOnClose: number;
+  lastZOnClose: number;
+  lostOrBroken: number;
 };
 
 export type FiscalMemoryDump = {
-  meta: FiscalMemoryMeta;
   serialRecord: SerialRecord | null;
+  fiscalModeStart: FiscalModeStart | null;
   fmNumbers: FMNumberRecord[];
-  vatRates: VatRateChange[];
-  ramResets: (FiscalDateTime | null)[];
-  taxRecords: TaxIdRecord[];
-  testRecords: (FiscalDateTime | null)[];
+  taxNumbers: TaxIdRecord[];
+  vatRateChanges: VatRateChange[];
+  ramResets: RamResetRecord[];
   zReports: ZReport[];
+  ejOpen: EJOpenRecord[];
+  ejClose: EJCloseRecord[];
+  cpuId: number[];
 };

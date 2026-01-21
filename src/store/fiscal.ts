@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import type {
   FiscalMemoryDump,
-  FiscalMemoryMeta,
+  FiscalModeStart,
   FMNumberRecord,
+  RamResetRecord,
   SerialRecord,
-  VatRateChange,
   TaxIdRecord,
+  VatRateChange,
   ZReport,
 } from "@/lib/fm-types";
 
@@ -14,13 +15,12 @@ type FiscalState = {
   path: string | null;
   message: string | null;
   setData: (data: FiscalMemoryDump | null) => void;
-  setMeta: (meta: FiscalMemoryMeta) => void;
   setSerial: (serial: SerialRecord) => void;
+  setFiscalModeStart: (record: FiscalModeStart) => void;
   setFMNumbers: (fmNumbers: FMNumberRecord[]) => void;
-  setVatRates: (rates: VatRateChange[]) => void;
-  setRamResets: (resets: (FiscalMemoryDump["ramResets"][number])[]) => void;
-  setTaxRecords: (records: TaxIdRecord[]) => void;
-  clearTestRecords: () => void;
+  setVatRateChanges: (rates: VatRateChange[]) => void;
+  setRamResets: (resets: RamResetRecord[]) => void;
+  setTaxNumbers: (records: TaxIdRecord[]) => void;
   setPath: (path: string | null) => void;
   setMessage: (message: string | null) => void;
   setZReports: (updater: (reports: ZReport[]) => ZReport[]) => void;
@@ -31,15 +31,15 @@ export const useFiscalStore = create<FiscalState>((set) => ({
   path: null,
   message: null,
   setData: (data) => set({ data }),
-  setMeta: (meta) =>
-    set((state) => {
-      if (!state.data) return state;
-      return { ...state, data: { ...state.data, meta } };
-    }),
   setSerial: (serial) =>
     set((state) => {
       if (!state.data) return state;
       return { ...state, data: { ...state.data, serialRecord: serial } };
+    }),
+  setFiscalModeStart: (record) =>
+    set((state) => {
+      if (!state.data) return state;
+      return { ...state, data: { ...state.data, fiscalModeStart: record } };
     }),
   setFMNumbers: (fmNumbers) =>
     set((state) => {
@@ -51,22 +51,17 @@ export const useFiscalStore = create<FiscalState>((set) => ({
       if (!state.data) return state;
       return { ...state, data: { ...state.data, ramResets: resets } };
     }),
-  setTaxRecords: (records) =>
+  setTaxNumbers: (records) =>
     set((state) => {
       if (!state.data) return state;
-      return { ...state, data: { ...state.data, taxRecords: records } };
+      return { ...state, data: { ...state.data, taxNumbers: records } };
     }),
   setPath: (path) => set({ path }),
   setMessage: (message) => set({ message }),
-  setVatRates: (rates) =>
+  setVatRateChanges: (rates) =>
     set((state) => {
       if (!state.data) return state;
-      return { ...state, data: { ...state.data, vatRates: rates } };
-    }),
-  clearTestRecords: () =>
-    set((state) => {
-      if (!state.data) return state;
-      return { ...state, data: { ...state.data, testRecords: [] } };
+      return { ...state, data: { ...state.data, vatRateChanges: rates } };
     }),
   setZReports: (updater) =>
     set((state) => {

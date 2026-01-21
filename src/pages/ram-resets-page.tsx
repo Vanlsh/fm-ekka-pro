@@ -15,16 +15,19 @@ import { Input } from "@/components/ui/input";
 import { useFiscalStore } from "@/store/fiscal";
 import { toast } from "@/components/ui/sonner";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { buildRawFromIso } from "@/lib/fm-datetime";
 
 const resetEntrySchema = z.object({
   iso: z.string().min(1, "Дата не може бути порожньою"),
+  NextZNumber: z.number(),
+  Flag: z.number(),
 });
 
 const resetSchema = z.object({
   ramResets: z
     .array(resetEntrySchema)
     .min(0)
-    .max(8, "Не більше 8 записів"),
+    .max(100, "Не більше 100 записів"),
 });
 
 type ResetFormValues = z.infer<typeof resetSchema>;
@@ -37,7 +40,9 @@ export const RamResetsPage = () => {
     defaultValues: {
       ramResets:
         data?.ramResets.map((item) => ({
-          iso: item?.iso ?? "",
+          iso: item?.dateTime?.iso ?? "",
+          NextZNumber: item?.NextZNumber ?? 0,
+          Flag: item?.Flag ?? 0,
         })) ?? [],
     },
   });
@@ -55,7 +60,9 @@ export const RamResetsPage = () => {
     if (data?.ramResets) {
       form.reset({
         ramResets: data.ramResets.map((item) => ({
-          iso: item?.iso ?? "",
+          iso: item?.dateTime?.iso ?? "",
+          NextZNumber: item?.NextZNumber ?? 0,
+          Flag: item?.Flag ?? 0,
         })),
       });
     }
@@ -63,10 +70,18 @@ export const RamResetsPage = () => {
 
   const onSubmit: SubmitHandler<ResetFormValues> = (values) => {
     if (!data) return;
-    const next = values.ramResets.map((item, idx) => {
-      const raw = data.ramResets[idx]?.raw ?? { time: 0, date: 0 };
-      return { raw, iso: item.iso };
-    });
+    const next = [];
+    for (let idx = 0; idx < values.ramResets.length; idx += 1) {
+      const item = values.ramResets[idx];
+      const raw =
+        buildRawFromIso(item.iso) ?? data.ramResets[idx]?.dateTime?.raw;
+      if (!raw) return;
+      next.push({
+        dateTime: { raw, iso: item.iso },
+        NextZNumber: item.NextZNumber,
+        Flag: item.Flag,
+      });
+    }
     setRamResets(next);
     setMessage("RAM скидання оновлено.");
     toast.success("RAM скидання оновлено");
@@ -100,8 +115,8 @@ export const RamResetsPage = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => append({ iso: "" })}
-              disabled={fields.length >= 8}
+              onClick={() => append({ iso: "", NextZNumber: 0, Flag: 0 })}
+              disabled={fields.length >= 100}
             >
               Додати
             </Button>
@@ -143,6 +158,47 @@ export const RamResetsPage = () => {
                   </FormItem>
                 )}
               />
+
+              <div className="grid gap-2 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name={`ramResets.${index}.NextZNumber`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Наступний Z</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`ramResets.${index}.Flag`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Flag</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -156,7 +212,9 @@ export const RamResetsPage = () => {
                 form.reset({
                   ramResets:
                     data.ramResets.map((item) => ({
-                      iso: item?.iso ?? "",
+                      iso: item?.dateTime?.iso ?? "",
+                      NextZNumber: item?.NextZNumber ?? 0,
+                      Flag: item?.Flag ?? 0,
                     })) ?? [],
                 })
               }

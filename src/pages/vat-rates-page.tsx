@@ -16,6 +16,7 @@ import { useFiscalStore } from "@/store/fiscal";
 import { toast } from "@/components/ui/sonner";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { buildRawFromIso } from "@/lib/fm-datetime";
 
 const vatEntrySchema = z.object({
   iso: z.string().min(1, "Дата не може бути порожньою"),
@@ -23,47 +24,67 @@ const vatEntrySchema = z.object({
   VatB: z.number(),
   VatC: z.number(),
   VatD: z.number(),
-  VatM: z.number(),
+  VatE: z.number(),
+  VatF: z.number(),
+  VatG: z.number(),
   VatH: z.number(),
-  DecPoint: z.number(),
+  VatAzbir: z.number(),
+  VatBzbir: z.number(),
+  VatCzbir: z.number(),
+  VatDzbir: z.number(),
+  VatEzbir: z.number(),
+  VatFzbir: z.number(),
+  VatGzbir: z.number(),
+  VatHzbir: z.number(),
+  NextZNumber: z.number(),
   VATExcluded: z.number(),
-  AssociatedMask: z.number(),
+  DecPoint: z.number(),
 });
 
 const vatSchema = z.object({
-  vatRates: z
+  vatRateChanges: z
     .array(vatEntrySchema)
     .min(1, "Потрібен хоча б один запис")
-    .max(8, "Не більше 8 записів"),
+    .max(32, "Не більше 32 записів"),
 });
 
 type VatFormValues = z.infer<typeof vatSchema>;
 
 export const VatRatesPage = () => {
-  const { data, setVatRates, setMessage } = useFiscalStore();
+  const { data, setVatRateChanges, setMessage } = useFiscalStore();
 
   const form = useForm<VatFormValues>({
     resolver: zodResolver(vatSchema),
     defaultValues: {
-      vatRates:
-        data?.vatRates.map((item) => ({
+      vatRateChanges:
+        data?.vatRateChanges.map((item) => ({
           iso: item.dateTime?.iso ?? "",
           VatA: item.VatA,
           VatB: item.VatB,
           VatC: item.VatC,
           VatD: item.VatD,
-          VatM: item.VatM,
+          VatE: item.VatE,
+          VatF: item.VatF,
+          VatG: item.VatG,
           VatH: item.VatH,
-          DecPoint: item.DecPoint,
+          VatAzbir: item.VatAzbir,
+          VatBzbir: item.VatBzbir,
+          VatCzbir: item.VatCzbir,
+          VatDzbir: item.VatDzbir,
+          VatEzbir: item.VatEzbir,
+          VatFzbir: item.VatFzbir,
+          VatGzbir: item.VatGzbir,
+          VatHzbir: item.VatHzbir,
+          NextZNumber: item.NextZNumber,
           VATExcluded: item.VATExcluded,
-          AssociatedMask: item.AssociatedMask,
+          DecPoint: item.DecPoint,
         })) ?? [],
     },
   });
 
   const { fields, append, remove, move } = useFieldArray({
     control: form.control,
-    name: "vatRates",
+    name: "vatRateChanges",
   });
   const [listRef] = useAutoAnimate<HTMLDivElement>({
     duration: 250,
@@ -71,42 +92,66 @@ export const VatRatesPage = () => {
   });
 
   useEffect(() => {
-    if (data?.vatRates) {
+    if (data?.vatRateChanges) {
       form.reset({
-        vatRates: data.vatRates.map((item) => ({
+        vatRateChanges: data.vatRateChanges.map((item) => ({
           iso: item.dateTime?.iso ?? "",
           VatA: item.VatA,
           VatB: item.VatB,
           VatC: item.VatC,
           VatD: item.VatD,
-          VatM: item.VatM,
+          VatE: item.VatE,
+          VatF: item.VatF,
+          VatG: item.VatG,
           VatH: item.VatH,
-          DecPoint: item.DecPoint,
+          VatAzbir: item.VatAzbir,
+          VatBzbir: item.VatBzbir,
+          VatCzbir: item.VatCzbir,
+          VatDzbir: item.VatDzbir,
+          VatEzbir: item.VatEzbir,
+          VatFzbir: item.VatFzbir,
+          VatGzbir: item.VatGzbir,
+          VatHzbir: item.VatHzbir,
+          NextZNumber: item.NextZNumber,
           VATExcluded: item.VATExcluded,
-          AssociatedMask: item.AssociatedMask,
+          DecPoint: item.DecPoint,
         })),
       });
     }
-  }, [data?.vatRates, form]);
+  }, [data?.vatRateChanges, form]);
 
   const onSubmit: SubmitHandler<VatFormValues> = (values) => {
     if (!data) return;
-    const next = values.vatRates.map((item, idx) => {
-      const raw = data.vatRates[idx]?.dateTime?.raw ?? { time: 0, date: 0 };
-      return {
+    const next = [];
+    for (let idx = 0; idx < values.vatRateChanges.length; idx += 1) {
+      const item = values.vatRateChanges[idx];
+      const raw =
+        buildRawFromIso(item.iso) ?? data.vatRateChanges[idx]?.dateTime?.raw;
+      if (!raw) return;
+      next.push({
         dateTime: { raw, iso: item.iso },
         VatA: item.VatA,
         VatB: item.VatB,
         VatC: item.VatC,
         VatD: item.VatD,
-        VatM: item.VatM,
+        VatE: item.VatE,
+        VatF: item.VatF,
+        VatG: item.VatG,
         VatH: item.VatH,
-        DecPoint: item.DecPoint,
+        VatAzbir: item.VatAzbir,
+        VatBzbir: item.VatBzbir,
+        VatCzbir: item.VatCzbir,
+        VatDzbir: item.VatDzbir,
+        VatEzbir: item.VatEzbir,
+        VatFzbir: item.VatFzbir,
+        VatGzbir: item.VatGzbir,
+        VatHzbir: item.VatHzbir,
+        NextZNumber: item.NextZNumber,
         VATExcluded: item.VATExcluded,
-        AssociatedMask: item.AssociatedMask,
-      };
-    });
-    setVatRates(next);
+        DecPoint: item.DecPoint,
+      });
+    }
+    setVatRateChanges(next);
     setMessage("Ставки ПДВ оновлено.");
     toast.success("Ставки ПДВ оновлено");
   };
@@ -138,14 +183,24 @@ export const VatRatesPage = () => {
                 VatB: 0,
                 VatC: 0,
                 VatD: 0,
-                VatM: 0,
+                VatE: 0,
+                VatF: 0,
+                VatG: 0,
                 VatH: 0,
-                DecPoint: 0,
+                VatAzbir: 0,
+                VatBzbir: 0,
+                VatCzbir: 0,
+                VatDzbir: 0,
+                VatEzbir: 0,
+                VatFzbir: 0,
+                VatGzbir: 0,
+                VatHzbir: 0,
+                NextZNumber: 0,
                 VATExcluded: 0,
-                AssociatedMask: 0,
+                DecPoint: 0,
               })
             }
-            disabled={fields.length >= 8}
+            disabled={fields.length >= 32}
           >
             Додати
           </Button>
@@ -196,7 +251,7 @@ export const VatRatesPage = () => {
               <div className="grid gap-2 md:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name={`vatRates.${index}.iso`}
+                  name={`vatRateChanges.${index}.iso`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>ISO datetime</FormLabel>
@@ -210,10 +265,10 @@ export const VatRatesPage = () => {
 
                 <FormField
                   control={form.control}
-                  name={`vatRates.${index}.AssociatedMask`}
+                  name={`vatRateChanges.${index}.NextZNumber`}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mask</FormLabel>
+                      <FormLabel>Наступний Z</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -232,7 +287,68 @@ export const VatRatesPage = () => {
                   <FormField
                     key={name}
                     control={form.control}
-                    name={`vatRates.${index}.${name}`}
+                    name={`vatRateChanges.${index}.${name}`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{name}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            value={field.value ?? ""}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
+
+              <div className="grid gap-2 md:grid-cols-4">
+                {(["VatE", "VatF", "VatG", "VatH"] as const).map((name) => (
+                  <FormField
+                    key={name}
+                    control={form.control}
+                    name={`vatRateChanges.${index}.${name}`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{name}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            value={field.value ?? ""}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
+
+              <div className="grid gap-2 md:grid-cols-4">
+                {(
+                  [
+                    "VatAzbir",
+                    "VatBzbir",
+                    "VatCzbir",
+                    "VatDzbir",
+                    "VatEzbir",
+                    "VatFzbir",
+                    "VatGzbir",
+                    "VatHzbir",
+                  ] as const
+                ).map((name) => (
+                  <FormField
+                    key={name}
+                    control={form.control}
+                    name={`vatRateChanges.${index}.${name}`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{name}</FormLabel>
@@ -253,11 +369,11 @@ export const VatRatesPage = () => {
               </div>
 
               <div className="grid gap-2 md:grid-cols-3">
-                {(["VatM", "VatH", "DecPoint"] as const).map((name) => (
+                {(["DecPoint", "VATExcluded"] as const).map((name) => (
                   <FormField
                     key={name}
                     control={form.control}
-                    name={`vatRates.${index}.${name}`}
+                    name={`vatRateChanges.${index}.${name}`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{name}</FormLabel>
@@ -275,23 +391,6 @@ export const VatRatesPage = () => {
                     )}
                   />
                 ))}
-                <FormField
-                  control={form.control}
-                  name={`vatRates.${index}.VATExcluded`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>VATExcluded</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          value={field.value ?? ""}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
             </div>
           ))}
@@ -304,18 +403,28 @@ export const VatRatesPage = () => {
               variant="ghost"
               onClick={() =>
                 form.reset({
-                  vatRates:
-                    data.vatRates.map((item) => ({
+                  vatRateChanges:
+                    data.vatRateChanges.map((item) => ({
                       iso: item.dateTime?.iso ?? "",
                       VatA: item.VatA,
                       VatB: item.VatB,
                       VatC: item.VatC,
                       VatD: item.VatD,
-                      VatM: item.VatM,
+                      VatE: item.VatE,
+                      VatF: item.VatF,
+                      VatG: item.VatG,
                       VatH: item.VatH,
-                      DecPoint: item.DecPoint,
+                      VatAzbir: item.VatAzbir,
+                      VatBzbir: item.VatBzbir,
+                      VatCzbir: item.VatCzbir,
+                      VatDzbir: item.VatDzbir,
+                      VatEzbir: item.VatEzbir,
+                      VatFzbir: item.VatFzbir,
+                      VatGzbir: item.VatGzbir,
+                      VatHzbir: item.VatHzbir,
+                      NextZNumber: item.NextZNumber,
                       VATExcluded: item.VATExcluded,
-                      AssociatedMask: item.AssociatedMask,
+                      DecPoint: item.DecPoint,
                     })) ?? [],
                 })
               }

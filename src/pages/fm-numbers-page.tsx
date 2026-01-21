@@ -16,6 +16,7 @@ import { useFiscalStore } from "@/store/fiscal";
 import { toast } from "@/components/ui/sonner";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { buildRawFromIso } from "@/lib/fm-datetime";
 
 const fmEntrySchema = z.object({
   iso: z.string().min(1, "Дата не може бути порожньою"),
@@ -67,13 +68,17 @@ export const FMNumbersPage = () => {
 
   const onSubmit: SubmitHandler<FMFormValues> = (values) => {
     if (!data) return;
-    const next = values.fmNumbers.map((item, idx) => {
-      const raw = data.fmNumbers[idx]?.dateTime?.raw ?? { time: 0, date: 0 };
-      return {
+    const next = [];
+    for (let idx = 0; idx < values.fmNumbers.length; idx += 1) {
+      const item = values.fmNumbers[idx];
+      const raw =
+        buildRawFromIso(item.iso) ?? data.fmNumbers[idx]?.dateTime?.raw;
+      if (!raw) return;
+      next.push({
         dateTime: { raw, iso: item.iso },
         fmNumber: item.fmNumber,
-      };
-    });
+      });
+    }
     setFMNumbers(next);
     setMessage("Номери ФМ оновлено.");
     toast.success("Номери ФМ оновлено");

@@ -18,9 +18,8 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Barcode,
+  CalendarClock,
   ChevronDown,
-  FlaskConical,
-  Info,
   ListOrdered,
   Percent,
   Receipt,
@@ -35,13 +34,12 @@ import {
 import { useFiscalStore } from "@/store/fiscal";
 
 const navItems = [
-  { to: "/meta", label: "Мета", icon: Info },
+  { to: "/fiscal-mode-start", label: "Фіскальний режим", icon: CalendarClock },
   { to: "/serial", label: "Серійний номер", icon: Barcode },
   { to: "/fm-numbers", label: "Номери ФМ", icon: ListOrdered },
   { to: "/vat-rates", label: "Ставки ПДВ", icon: Percent },
   { to: "/ram-resets", label: "Скидання RAM", icon: RefreshCcw },
   { to: "/tax-records", label: "Податкові записи", icon: ScrollText },
-  { to: "/test-records", label: "Тестові записи", icon: FlaskConical },
   { to: "/z-reports", label: "Z-звіти", icon: Receipt },
 ];
 
@@ -97,8 +95,7 @@ export function AppSidebar() {
     setMessage(null);
     try {
       const result = await window.api.openFiscalMemory();
-      console.log("🚀 ~ handleLoadFromSidebar ~ result:", result);
-      return;
+      console.log("🚀 ~ handleLoadFromSidebar ~ result:", result)
       if (!result) {
         setMessage("Скасовано.");
         return;

@@ -16,16 +16,16 @@ import { useFiscalStore } from "@/store/fiscal";
 import { toast } from "@/components/ui/sonner";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { buildRawFromIso } from "@/lib/fm-datetime";
 
 const taxEntrySchema = z.object({
   iso: z.string().min(1, "Дата не може бути порожньою"),
   type: z.number(),
-  lastZReport: z.number(),
   taxNumber: z.string().min(1, "Податковий номер обов'язковий"),
 });
 
 const taxSchema = z.object({
-  taxRecords: z
+  taxNumbers: z
     .array(taxEntrySchema)
     .min(1, "Потрібен хоча б один запис")
     .max(8, "Не більше 8 записів"),
@@ -34,16 +34,15 @@ const taxSchema = z.object({
 type TaxFormValues = z.infer<typeof taxSchema>;
 
 export const TaxRecordsPage = () => {
-  const { data, setTaxRecords, setMessage } = useFiscalStore();
+  const { data, setTaxNumbers, setMessage } = useFiscalStore();
 
   const form = useForm<TaxFormValues>({
     resolver: zodResolver(taxSchema),
     defaultValues: {
-      taxRecords:
-        data?.taxRecords.map((item) => ({
+      taxNumbers:
+        data?.taxNumbers.map((item) => ({
           iso: item.dateTime?.iso ?? "",
           type: item.type,
-          lastZReport: item.lastZReport,
           taxNumber: item.taxNumber,
         })) ?? [],
     },
@@ -51,7 +50,7 @@ export const TaxRecordsPage = () => {
 
   const { fields, append, remove, move } = useFieldArray({
     control: form.control,
-    name: "taxRecords",
+    name: "taxNumbers",
   });
   const [listRef] = useAutoAnimate<HTMLDivElement>({
     duration: 250,
@@ -59,30 +58,32 @@ export const TaxRecordsPage = () => {
   });
 
   useEffect(() => {
-    if (data?.taxRecords) {
+    if (data?.taxNumbers) {
       form.reset({
-        taxRecords: data.taxRecords.map((item) => ({
+        taxNumbers: data.taxNumbers.map((item) => ({
           iso: item.dateTime?.iso ?? "",
           type: item.type,
-          lastZReport: item.lastZReport,
           taxNumber: item.taxNumber,
         })),
       });
     }
-  }, [data?.taxRecords, form]);
+  }, [data?.taxNumbers, form]);
 
   const onSubmit: SubmitHandler<TaxFormValues> = (values) => {
     if (!data) return;
-    const next = values.taxRecords.map((item, idx) => {
-      const raw = data.taxRecords[idx]?.dateTime?.raw ?? { time: 0, date: 0 };
-      return {
+    const next = [];
+    for (let idx = 0; idx < values.taxNumbers.length; idx += 1) {
+      const item = values.taxNumbers[idx];
+      const raw =
+        buildRawFromIso(item.iso) ?? data.taxNumbers[idx]?.dateTime?.raw;
+      if (!raw) return;
+      next.push({
         dateTime: { raw, iso: item.iso },
         type: item.type,
-        lastZReport: item.lastZReport,
         taxNumber: item.taxNumber,
-      };
-    });
-    setTaxRecords(next);
+      });
+    }
+    setTaxNumbers(next);
     setMessage("Податкові записи оновлено.");
     toast.success("Податкові записи оновлено");
   };
@@ -108,7 +109,7 @@ export const TaxRecordsPage = () => {
             type="button"
             variant="outline"
             onClick={() =>
-              append({ iso: "", type: 0, lastZReport: 0, taxNumber: "" })
+              append({ iso: "", type: 0, taxNumber: "" })
             }
             disabled={fields.length >= 8}
           >
@@ -161,7 +162,7 @@ export const TaxRecordsPage = () => {
               <div className="grid gap-2 md:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name={`taxRecords.${index}.iso`}
+                  name={`taxNumbers.${index}.iso`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>ISO datetime</FormLabel>
@@ -175,7 +176,7 @@ export const TaxRecordsPage = () => {
 
                 <FormField
                   control={form.control}
-                  name={`taxRecords.${index}.taxNumber`}
+                  name={`taxNumbers.${index}.taxNumber`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Податковий номер</FormLabel>
@@ -191,7 +192,7 @@ export const TaxRecordsPage = () => {
               <div className="grid gap-2 md:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name={`taxRecords.${index}.type`}
+                  name={`taxNumbers.${index}.type`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Тип</FormLabel>
@@ -209,25 +210,6 @@ export const TaxRecordsPage = () => {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name={`taxRecords.${index}.lastZReport`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Останній Z-звіт</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
             </div>
           ))}
@@ -240,11 +222,10 @@ export const TaxRecordsPage = () => {
               variant="ghost"
               onClick={() =>
                 form.reset({
-                  taxRecords:
-                    data.taxRecords.map((item) => ({
+                  taxNumbers:
+                    data.taxNumbers.map((item) => ({
                       iso: item.dateTime?.iso ?? "",
                       type: item.type,
-                      lastZReport: item.lastZReport,
                       taxNumber: item.taxNumber,
                     })) ?? [],
                 })

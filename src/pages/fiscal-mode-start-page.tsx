@@ -16,44 +16,41 @@ import { useFiscalStore } from "@/store/fiscal";
 import { toast } from "@/components/ui/sonner";
 import { buildRawFromIso } from "@/lib/fm-datetime";
 
-const serialSchema = z.object({
+const fiscalModeSchema = z.object({
   iso: z.string().min(1, "Дата не може бути порожньою"),
-  serialNumber: z.string().min(1, "Серійний номер обов'язковий"),
 });
 
-type SerialFormValues = z.infer<typeof serialSchema>;
+type FiscalModeFormValues = z.infer<typeof fiscalModeSchema>;
 
-export const SerialPage = () => {
-  const { data, setMessage, setSerial } = useFiscalStore();
+export const FiscalModeStartPage = () => {
+  const { data, setMessage, setFiscalModeStart } = useFiscalStore();
 
-  const form = useForm<SerialFormValues>({
-    resolver: zodResolver(serialSchema),
+  const form = useForm<FiscalModeFormValues>({
+    resolver: zodResolver(fiscalModeSchema),
     defaultValues: {
-      iso: data?.serialRecord?.dateTime?.iso ?? "",
-      serialNumber: data?.serialRecord?.serialNumber ?? "",
+      iso: data?.fiscalModeStart?.dateTime?.iso ?? "",
     },
   });
 
   useEffect(() => {
-    if (data?.serialRecord) {
+    if (data?.fiscalModeStart) {
       form.reset({
-        iso: data.serialRecord.dateTime?.iso ?? "",
-        serialNumber: data.serialRecord.serialNumber ?? "",
+        iso: data.fiscalModeStart.dateTime?.iso ?? "",
       });
     }
-  }, [data?.serialRecord, form]);
+  }, [data?.fiscalModeStart, form]);
 
-  const onSubmit: SubmitHandler<SerialFormValues> = (values) => {
+  const onSubmit: SubmitHandler<FiscalModeFormValues> = (values) => {
     if (!data) return;
-    const raw = buildRawFromIso(values.iso) ?? data.serialRecord?.dateTime?.raw;
+    const raw =
+      buildRawFromIso(values.iso) ?? data.fiscalModeStart?.dateTime?.raw;
     if (!raw) return;
     const next = {
       dateTime: { raw, iso: values.iso },
-      serialNumber: values.serialNumber,
     };
-    setSerial(next);
-    setMessage("Серійну інформацію оновлено.");
-    toast.success("Серійну інформацію оновлено");
+    setFiscalModeStart(next);
+    setMessage("Фіскальний режим оновлено.");
+    toast.success("Фіскальний режим оновлено");
   };
 
   return (
@@ -69,7 +66,7 @@ export const SerialPage = () => {
             className="space-y-4"
             noValidate
           >
-            <p className="text-base font-semibold">Серійний запис</p>
+            <p className="text-base font-semibold">Фіскальний режим</p>
 
             <FormField
               control={form.control}
@@ -77,20 +74,6 @@ export const SerialPage = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>ISO Дата/час</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="serialNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Серійний номер</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>

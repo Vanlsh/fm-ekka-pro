@@ -1,4 +1,4 @@
-import type { SuccessResponse, ErrorResponse } from "./lib/types";
+// import type { SuccessResponse, ErrorResponse } from "./lib/types";
 import type { FiscalMemoryDump, ZReport } from "./lib/fm-types";
 
 export {};

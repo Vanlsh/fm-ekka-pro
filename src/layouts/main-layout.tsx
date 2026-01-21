@@ -25,6 +25,7 @@ import {
   Receipt,
   RefreshCcw,
   ScrollText,
+  TriangleAlert,
 } from "lucide-react";
 import {
   Collapsible,
@@ -41,6 +42,7 @@ const navItems = [
   { to: "/ram-resets", label: "Скидання RAM", icon: RefreshCcw },
   { to: "/tax-records", label: "Податкові записи", icon: ScrollText },
   { to: "/z-reports", label: "Z-звіти", icon: Receipt },
+  { to: "/logs", label: "Логи перевірки", icon: TriangleAlert },
 ];
 
 const getSectionLabel = (path: string) =>

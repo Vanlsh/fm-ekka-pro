@@ -136,6 +136,14 @@ export type EJCloseRecord = {
   lostOrBroken: number;
 };
 
+export type FiscalWarning = {
+  type: "checksum" | "future-date";
+  recordType: string;
+  index: number;
+  offset: number;
+  message: string;
+};
+
 export type FiscalMemoryDump = {
   serialRecord: SerialRecord | null;
   fiscalModeStart: FiscalModeStart | null;
@@ -147,4 +155,5 @@ export type FiscalMemoryDump = {
   ejOpen: EJOpenRecord[];
   ejClose: EJCloseRecord[];
   cpuId: number[];
+  warnings?: FiscalWarning[];
 };

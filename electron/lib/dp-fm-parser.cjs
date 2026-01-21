@@ -57,6 +57,20 @@ const applyChecksum = (buffer, start, length) => {
   buffer[start + length - 1] = checksumFromSlice(buffer, start, length);
 };
 
+const verifyChecksum = (buffer, start, length) => {
+  if (isRecordEmpty(buffer, start, length)) return true;
+  const expected = buffer[start + length - 1];
+  const actual = checksumFromSlice(buffer, start, length);
+  return expected === actual;
+};
+
+const isFutureIso = (iso) => {
+  if (!iso) return false;
+  const ts = Date.parse(iso);
+  if (Number.isNaN(ts)) return false;
+  return ts > Date.now();
+};
+
 const readUInt64LE = (buffer, offset) => {
   let value = 0n;
   for (let i = 0; i < 8; i++) {
@@ -505,20 +519,77 @@ const parseDP25FiscalMemory = (buffer) => {
     throw new Error("File too small to be a valid DP fiscal memory dump");
   }
 
+  const warnings = [];
+  const addWarning = (warning) => {
+    warnings.push(warning);
+    console.warn(warning.message);
+  };
+
+  const checkRecord = (recordType, index, recordOffset, length, iso) => {
+    if (!verifyChecksum(buffer, recordOffset, length)) {
+      addWarning({
+        type: "checksum",
+        recordType,
+        index,
+        offset: recordOffset,
+        message: `Checksum mismatch in ${recordType}[${index}] at 0x${recordOffset.toString(
+          16
+        )}`,
+      });
+    }
+    if (iso && isFutureIso(iso)) {
+      addWarning({
+        type: "future-date",
+        recordType,
+        index,
+        offset: recordOffset,
+        message: `Future date in ${recordType}[${index}] at 0x${recordOffset.toString(
+          16
+        )}: ${iso}`,
+      });
+    }
+  };
+
   let offset = 0;
 
   offset += TEST_SPACE_SIZE;
 
   const serialRecord = parseSerialRecord(buffer, offset);
+  if (!isRecordEmpty(buffer, offset, SERIAL_RECORD_SIZE)) {
+    checkRecord(
+      "SerialRecord",
+      0,
+      offset,
+      SERIAL_RECORD_SIZE,
+      serialRecord?.dateTime?.iso
+    );
+  }
   offset += SERIAL_RECORD_SIZE;
 
   const fiscalModeStart = parseFiscalModeStart(buffer, offset);
+  if (!isRecordEmpty(buffer, offset, FISCAL_MODE_START_SIZE)) {
+    checkRecord(
+      "FiscalModeStart",
+      0,
+      offset,
+      FISCAL_MODE_START_SIZE,
+      fiscalModeStart?.dateTime?.iso
+    );
+  }
   offset += FISCAL_MODE_START_SIZE;
 
   const fmNumbers = [];
   for (let i = 0; i < FM_NUMBER_COUNT; i++) {
     if (!isRecordEmpty(buffer, offset, FM_NUMBER_RECORD_SIZE)) {
-      fmNumbers.push(parseFMNumberRecord(buffer, offset));
+      const record = parseFMNumberRecord(buffer, offset);
+      fmNumbers.push(record);
+      checkRecord(
+        "FMNumberRecord",
+        i,
+        offset,
+        FM_NUMBER_RECORD_SIZE,
+        record?.dateTime?.iso
+      );
     }
     offset += FM_NUMBER_RECORD_SIZE;
   }
@@ -526,7 +597,15 @@ const parseDP25FiscalMemory = (buffer) => {
   const taxNumbers = [];
   for (let i = 0; i < TAX_ID_COUNT; i++) {
     if (!isRecordEmpty(buffer, offset, TAX_ID_RECORD_SIZE)) {
-      taxNumbers.push(parseTaxIdRecord(buffer, offset));
+      const record = parseTaxIdRecord(buffer, offset);
+      taxNumbers.push(record);
+      checkRecord(
+        "TaxIDNum",
+        i,
+        offset,
+        TAX_ID_RECORD_SIZE,
+        record?.dateTime?.iso
+      );
     }
     offset += TAX_ID_RECORD_SIZE;
   }
@@ -534,7 +613,15 @@ const parseDP25FiscalMemory = (buffer) => {
   const vatRateChanges = [];
   for (let i = 0; i < VAT_RATE_COUNT; i++) {
     if (!isRecordEmpty(buffer, offset, VAT_RATE_RECORD_SIZE)) {
-      vatRateChanges.push(parseVatRateChange(buffer, offset));
+      const record = parseVatRateChange(buffer, offset);
+      vatRateChanges.push(record);
+      checkRecord(
+        "VatRateChanges",
+        i,
+        offset,
+        VAT_RATE_RECORD_SIZE,
+        record?.dateTime?.iso
+      );
     }
     offset += VAT_RATE_RECORD_SIZE;
   }
@@ -542,7 +629,15 @@ const parseDP25FiscalMemory = (buffer) => {
   const ramResets = [];
   for (let i = 0; i < RAM_RESET_COUNT; i++) {
     if (!isRecordEmpty(buffer, offset, RAM_RESET_RECORD_SIZE)) {
-      ramResets.push(parseRamResetRecord(buffer, offset));
+      const record = parseRamResetRecord(buffer, offset);
+      ramResets.push(record);
+      checkRecord(
+        "RAMResetRecord",
+        i,
+        offset,
+        RAM_RESET_RECORD_SIZE,
+        record?.dateTime?.iso
+      );
     }
     offset += RAM_RESET_RECORD_SIZE;
   }
@@ -550,7 +645,15 @@ const parseDP25FiscalMemory = (buffer) => {
   const zReports = [];
   for (let i = 0; i < Z_REPORT_COUNT; i++) {
     if (!isRecordEmpty(buffer, offset, Z_REPORT_SIZE)) {
-      zReports.push(parseZReport(buffer, offset));
+      const record = parseZReport(buffer, offset);
+      zReports.push(record);
+      checkRecord(
+        "ZReport",
+        i,
+        offset,
+        Z_REPORT_SIZE,
+        record?.DateTime?.iso
+      );
     }
     offset += Z_REPORT_SIZE;
   }
@@ -558,7 +661,15 @@ const parseDP25FiscalMemory = (buffer) => {
   const ejOpen = [];
   for (let i = 0; i < EJ_RECORD_COUNT; i++) {
     if (!isRecordEmpty(buffer, offset, EJ_RECORD_SIZE)) {
-      ejOpen.push(parseEJOpen(buffer, offset));
+      const record = parseEJOpen(buffer, offset);
+      ejOpen.push(record);
+      checkRecord(
+        "EJOpen",
+        i,
+        offset,
+        EJ_RECORD_SIZE,
+        record?.dateTime?.iso
+      );
     }
     offset += EJ_RECORD_SIZE;
   }
@@ -566,7 +677,15 @@ const parseDP25FiscalMemory = (buffer) => {
   const ejClose = [];
   for (let i = 0; i < EJ_RECORD_COUNT; i++) {
     if (!isRecordEmpty(buffer, offset, EJ_RECORD_SIZE)) {
-      ejClose.push(parseEJClose(buffer, offset));
+      const record = parseEJClose(buffer, offset);
+      ejClose.push(record);
+      checkRecord(
+        "EJClose",
+        i,
+        offset,
+        EJ_RECORD_SIZE,
+        record?.dateTime?.iso
+      );
     }
     offset += EJ_RECORD_SIZE;
   }
@@ -585,6 +704,7 @@ const parseDP25FiscalMemory = (buffer) => {
     ejOpen,
     ejClose,
     cpuId,
+    warnings,
   };
 };
 

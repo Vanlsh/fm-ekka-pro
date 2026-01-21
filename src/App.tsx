@@ -11,6 +11,7 @@ import { TaxRecordsPage } from "./pages/tax-records-page";
 import { TestRecordsPage } from "./pages/test-records-page";
 import { ZReportsPage } from "./pages/z-reports-page";
 import { ZReportEditPage } from "./pages/z-report-edit-page";
+import { LogsPage } from "./pages/logs-page";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="tax-records" element={<TaxRecordsPage />} />
           <Route path="test-records" element={<TestRecordsPage />} />
           <Route path="z-reports" element={<ZReportsPage />} />
+          <Route path="logs" element={<LogsPage />} />
           <Route path="z-report/:id/edit" element={<ZReportEditPage />} />
           <Route path="*" element={<Navigate to="/load" replace />} />
         </Route>

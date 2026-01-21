@@ -108,16 +108,17 @@ export const ZReportsPage = () => {
     if (!data) return;
     const nextNumber = reports.length + 1;
     pendingScrollIndexRef.current = reports.length;
-    setZReports((prev) => [
-      ...prev,
-      createEmptyZReport(nextNumber),
-    ]);
+    setZReports((prev) => [...prev, createEmptyZReport(nextNumber)]);
   };
 
   const normalizeReports = (items: ZReport[]) =>
     items.map((item, idx) => {
       const nextNumber = idx + 1;
-      return { ...createEmptyZReport(nextNumber), ...item, ZNumber: nextNumber };
+      return {
+        ...createEmptyZReport(nextNumber),
+        ...item,
+        ZNumber: nextNumber,
+      };
     });
 
   const handleImportReports = async (mode: "add" | "overwrite") => {
@@ -167,7 +168,7 @@ export const ZReportsPage = () => {
 
           return true;
         }),
-    [reports, dateFrom, dateTo, zNumberFilter]
+    [reports, dateFrom, dateTo, zNumberFilter],
   );
 
   const getItemKey = useCallback(
@@ -176,13 +177,13 @@ export const ZReportsPage = () => {
       if (!row) return virtualIndex;
       return `${row.report.ZNumber}-${row.index}`;
     },
-    [filteredReports]
+    [filteredReports],
   );
 
   const measureRow = useCallback(
     (el: Element | null | undefined) =>
       el?.getBoundingClientRect().height ?? itemEstimate,
-    [itemEstimate]
+    [itemEstimate],
   );
 
   const rowVirtualizer = useVirtualizer({
@@ -221,7 +222,7 @@ export const ZReportsPage = () => {
         .map((item, idx) => ({
           ...item,
           ZNumber: idx + 1,
-        }))
+        })),
     );
   };
 
@@ -236,7 +237,7 @@ export const ZReportsPage = () => {
         .map((item, idx) => ({
           ...item,
           ZNumber: idx + 1,
-        }))
+        })),
     );
   };
 
@@ -245,7 +246,7 @@ export const ZReportsPage = () => {
     key: string,
     start: number,
     virtualIndex: number,
-    originalIndex: number
+    originalIndex: number,
   ) => {
     const isOpen = !!openDetails[report.ZNumber];
     return (
@@ -400,7 +401,7 @@ export const ZReportsPage = () => {
             <p className="text-xs text-muted-foreground">
               Всього: {filteredReports.length} / {reports.length}
             </p>
-            <Button
+            {/* <Button
               size="sm"
               variant="outline"
               onClick={() => {
@@ -408,7 +409,7 @@ export const ZReportsPage = () => {
               }}
             >
               Імпорт
-            </Button>
+            </Button> */}
             <Button size="sm" onClick={handleAddReport}>
               Додати
             </Button>
@@ -517,7 +518,7 @@ export const ZReportsPage = () => {
                   String(item.key),
                   item.start,
                   item.index,
-                  row.index
+                  row.index,
                 );
               })}
             </div>

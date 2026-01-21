@@ -111,7 +111,7 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "build/logo.ico"
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -122,7 +122,7 @@
     },
     "mac": {
       "target": "dmg",
-      "icon": "build/icon.icns"
+      "icon": "build/icon.png"
     },
     "linux": {
       "target": "AppImage"
